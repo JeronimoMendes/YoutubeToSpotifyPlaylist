@@ -31,15 +31,20 @@ def playlist_links(link_playlist):
         links.append(("http://www.youtube.com/" + l.get("href")))
     return links
 
+# Serve para dar informação ao utilizador de quais a músicas retiradas do youtube
+nr = 0 #
 
 # Corre as duas funcoes, acabando com um lista com os nomes das musicas da playlist
 for i in playlist_links(url_playlist):
+    nr += 1
     titulo = titulo_yt((i))
     musicas.append(titulo)
+    print("Música ", nr," : ", titulo, " recolhida!")
 
 # Parte do Spotify
 
 # Permite acessar a API
+
 
 token = util.prompt_for_user_token("stilton19", scope='playlist-modify-private,playlist-modify-public',
                                    client_id='your-spotify-client-id', client_secret='your-spotify-client-secret',
