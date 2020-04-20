@@ -1,21 +1,25 @@
-from pprint import pprint
+import json
+import webbrowser
 import bs4
 import requests
-import json
 
-spotify_token = "BQBAtxNrhuw-3ZthKLP3i6fXYelsYi_W1atCpWp84evEgtjpLyU4huJrkoj" \
-                "HqmRN4A33sja8mGsAZAef2IrIU2ua8awDYQmoVmCI2CQ3c225UAVIqiaQdk" \
-                "LDNUagFRTrWMDyNF3iwhvNDQJNyRANaKmEqA_s8ZGelCKN21JIm18UYpuxH" \
-                "_ZahKdou-e2eKFnH8xDjE_NV9V4MvZJ5VGp24SFrWfHeoH7CSlPnNWKsyxR" \
-                "g1YIRZ-atub5poaiLLwamb46jZn5"
-
-musicas = []
-url_playlist = "https://www.youtube.com/playlist?list=PL1hQ6_WNAUuIurc2oKsk5VU1jFE55cfmR"
-user_id = input("Qual o teu ID Spotify? ")
-nome_playlist = input("Qual o nome da playlist? ")
+user_id = input("ID Spotify: ")
+print("Uma pagina web vai abrir. Carrega em (GET TOKEN) e checka a primeira caixa da lista, depois copia o "
+      "codigo e insere-o aqui. Carrega OK para abrir a pagina.")
+r = input("")
+webbrowser.open("https://developer.spotify.com/console/post-playlists/?user_id=&body=%7B%22name%22%3A%22New"
+                "%20Playlist%22%2C%22description%22%3A%22New%20playlist%20description%22%2C%22public%22%3Afalse%7D")
+spotify_token = input("Usa o website para obteres o token de acesso e insere-o aqui: ")
+url_playlist = "https://www.youtube.com/playlist?list=PL1hQ6_WNAUuJaRlUIEtp3CS_UjlNw6Xnu"
+nome_playlist = input("Nome da playlist: ")
 descr = input("Descricao da playlist: ")
 
-palavras_proibidas = ["OFFICIAL", "VIDEO", "ALBUM", "VERSION", "AUDIO", "(", ")", "MUSIC VIDEO", "LYRICS", "[", "]"]
+musicas = []
+
+palavras_proibidas = ["OFFICIAL", "VIDEO", "ALBUM", "VERSION", "AUDIO", "(", ")",
+                      "MUSIC VIDEO", "LYRICS", "[", "]", "MUSIC", "HD"]
+
+print("A procurar as musicas...")
 
 
 # ------------------------------------------Parte do youtube--------------------------------------------------------
@@ -26,14 +30,16 @@ def titulo_yt(url_playlist):
     pagina = html_link.content
     title = bs4.BeautifulSoup(pagina, "html.parser")
 
-    result['title'] = title.find("span", attrs={"class": "watch-title"}).text.strip()
+    try:
+        result['title'] = title.find("span", attrs={"class": "watch-title"}).text.strip()
+        titulo = (str(result["title"])).upper()
 
-    titulo = (str(result["title"])).upper()
+        for palavra in palavras_proibidas:
+            titulo = titulo.replace(palavra, "")
 
-    for palavra in palavras_proibidas:
-        titulo = titulo.replace(palavra, "")
-
-    return titulo
+        return titulo
+    except:
+        print("Nao encontrado o titulo.")
 
 
 # Funcao que retira os links de cada musica da playlist
@@ -58,6 +64,8 @@ for i in playlist_links(url_playlist):
 
     musicas.append(titulo)
     print("Música ", nr, " recolhida! : ", titulo)
+
+print()
 
 
 # ----------------------------------------------Parte do Spotify------------------------------------------------------
@@ -131,5 +139,17 @@ for musica in musicas:
 a = ""
 lista_final = list(filter(None, uri_musicas))
 
-adicionar_musicas(id_playlist, lista_final)
-print("Feito")
+if len(lista_final) > 99:
+    lista1 = []
+    lista2 = []
+    for uri in lista_final:
+        if list.index(uri) > 90:
+            lista2.append(uri)
+        else:
+            lista1.append(uri)
+    adicionar_musicas(id_playlist, lista1)
+    adicionar_musicas(id_playlist, lista2)
+    print("Feito")
+else:
+    adicionar_musicas(id_playlist, lista_final)
+    print("Feito")
